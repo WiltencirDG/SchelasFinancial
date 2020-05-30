@@ -1,0 +1,23 @@
+{
+  "name": "schelasfinancial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WiltencirDG/SchelasFinancial.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WiltencirDG/SchelasFinancial/issues"
+  },
+  "homepage": "https://github.com/WiltencirDG/SchelasFinancial#readme",
+  "dependencies": {
+    "google-spreadsheet": "^3.0.11"
+  }
+}
