@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/WiltencirDG/SchelasFinancial#readme",
   "dependencies": {
-    "google-spreadsheet": "^3.0.11"
+    "google-spreadsheet": "^2.0.6"
   }
 }

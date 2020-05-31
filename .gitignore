@@ -106,3 +106,5 @@ dist
 
 # Credentials 
 credentials/*.*
+
+contas.json
