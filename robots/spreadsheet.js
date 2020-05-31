@@ -3,6 +3,8 @@ const { promisify } = require('util')
 const credentials = require('../credentials/google-spreadsheet.json')
 const state = require('./state.js')
 
+const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
+
 const headers = {
     cardHeader: "CARTÃO",
     bankHeader: "BANCO"
@@ -61,16 +63,14 @@ async function robot(){
             return new Promise((resolve,reject)=>{
                 let year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
                 
-                const firstRowsColumns = spreadsheetContent.filter((row) => row.row == 1 && row.col > 3)
+                const firstRowsColumns = spreadsheetContent.filter((row) => row.row == 1 && row.col > 3 && row.value != '')
                 firstRowsColumns.map(item => {
-                    if(item.value != ''){
-                        if(item.value == 'JANEIRO'){year++}
-    
-                        availableMonths.push({
-                            year: year.toString(),
-                            month: item.value
-                        })
-                    }                            
+                    if(item.value == 'JANEIRO'){year++}
+
+                    availableMonths.push({
+                        year: year.toString(),
+                        month: item.value
+                    })                          
                 })
                 
                 if(availableMonths.length == 0){
@@ -83,29 +83,25 @@ async function robot(){
         }
 
         async function getAllAvailableEntities(spreadsheetContent){
-            const availableMonths = []
-            
+            const availableEntities = []
+            let actualHeader
             return new Promise((resolve,reject)=>{
-                let year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
-                
-                const firstRowsColumns = spreadsheetContent.filter((row) => row.row == 1 && row.col > 3)
-                firstRowsColumns.map(item => {
-                    if(item.value != ''){
-                        if(item.value == 'JANEIRO'){year++}
-    
-                        availableMonths.push({
-                            year: year.toString(),
-                            month: item.value
+                const rowHeadersAndEntityName = spreadsheetContent.filter((content) => content.col < 3 && content._value != '')
+                console.log(rowHeadersAndEntityName,null,4)
+                for(let rowHeaderIndex in rowHeadersAndEntityName){
+                    if(rowHeadersAndEntityName[rowHeaderIndex].col == 1){
+                        actualHeader = rowHeadersAndEntityName[rowHeaderIndex]._value
+                    }
+                    if(rowHeadersAndEntityName[rowHeaderIndex].col == 2){
+                        availableEntities.push({
+                            type: EntityType[actualHeader],
+                            name: rowHeadersAndEntityName[rowHeaderIndex]._value,
+                            color: '#fefefe'
                         })
-                    }                            
-                })
-                
-                if(availableMonths.length == 0){
-                    reject('Error reading the spreadsheet')
+                    }
                 }
-                
-                resolve(availableMonths)
 
+                resolve(availableEntities)
             })
         }
     }
