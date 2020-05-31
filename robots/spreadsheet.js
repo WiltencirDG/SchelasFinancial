@@ -5,11 +5,6 @@ const state = require('./state.js')
 
 const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
 
-const headers = {
-    cardHeader: "CARTÃO",
-    bankHeader: "BANCO"
-}
-
 async function robot(){
     const content = {}
 
@@ -96,7 +91,7 @@ async function robot(){
                         availableEntities.push({
                             type: EntityType[actualHeader],
                             name: rowHeadersAndEntityName[rowHeaderIndex]._value,
-                            color: '#fefefe'
+                            color: ''
                         })
                     }
                 }
