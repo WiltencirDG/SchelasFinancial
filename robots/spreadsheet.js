@@ -9,13 +9,14 @@ const headers = {
 }
 
 async function robot(){
-    const content = []
+    const content = {}
 
     const spreadsheetDocument = await accessSpreadsheet()
     await authenticateSpreadsheet(spreadsheetDocument)
-    const spreadsheetRows = await readAllRows(spreadsheetDocument)
-    await organizeAllRows(spreadsheetRows)
+    const spreadsheetContent = await readAllRows(spreadsheetDocument)
+    await organizeAllRows(spreadsheetContent)
     
+    console.log(content,null,4)
     state.save(content)
 
     async function accessSpreadsheet(){
@@ -31,43 +32,82 @@ async function robot(){
         const info = await promisify(spreadsheetDocument.getInfo)()
         const sheet = info.worksheets[0]
     
-        const rows = await promisify(sheet.getRows)({
-            offset: 2,
-            limit: sheet.rowCount
+        const rows = await promisify(sheet.getCells)({
+            'min-row': 1,
+            'max-row': sheet.rowCount-27,
+            'min-col': 1,
+            'max-col': sheet.colCount,
+            'return-empty': true
         })
         
         content.title = sheet.title
         content.numRows = sheet.rowCount
+        content.numCols = sheet.colCount
 
         return rows
     }
 
-    async function organizeAllRows(spreadsheetRows){
+    async function organizeAllRows(spreadsheetContent){
         let actualHeader
         let actualOwner
+        content.availableMonths = await getAllAvailableMonths(spreadsheetContent)
+        content.availableEntities = await getAllAvailableEntities(spreadsheetContent)
         content.card = []
         content.bank = []
-        for(let spreadsheetRowIndex in spreadsheetRows){
-            if(spreadsheetRows[spreadsheetRowIndex]._cn6ca !== undefined){
-                actualHeader = spreadsheetRows[spreadsheetRowIndex]._cn6ca
-            }
+
+        async function getAllAvailableMonths(spreadsheetContent){
+            const availableMonths = []
             
-            if(spreadsheetRows[spreadsheetRowIndex]._cokwr !== undefined){
-                if(spreadsheetRows[spreadsheetRowIndex]._cokwr !== actualOwner){
-                    actualOwner = spreadsheetRows[spreadsheetRowIndex]._cokwr
-                    if(actualHeader = headers.cardHeader){
-                        content.card.push({
-                            name: actualOwner
+            return new Promise((resolve,reject)=>{
+                let year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
+                
+                const firstRowsColumns = spreadsheetContent.filter((row) => row.row == 1 && row.col > 3)
+                firstRowsColumns.map(item => {
+                    if(item.value != ''){
+                        if(item.value == 'JANEIRO'){year++}
+    
+                        availableMonths.push({
+                            year: year.toString(),
+                            month: item.value
                         })
-                    }else if(actualHeader = headers.bankHeader){
-                        content.bank.push({
-                            name: actualOwner
-                        })
-                    }
+                    }                            
+                })
+                
+                if(availableMonths.length == 0){
+                    reject('Error reading the spreadsheet')
                 }
-            }
+                
+                resolve(availableMonths)
+
+            })
         }
-        console.log(content,null,4)
+
+        async function getAllAvailableEntities(spreadsheetContent){
+            const availableMonths = []
+            
+            return new Promise((resolve,reject)=>{
+                let year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
+                
+                const firstRowsColumns = spreadsheetContent.filter((row) => row.row == 1 && row.col > 3)
+                firstRowsColumns.map(item => {
+                    if(item.value != ''){
+                        if(item.value == 'JANEIRO'){year++}
+    
+                        availableMonths.push({
+                            year: year.toString(),
+                            month: item.value
+                        })
+                    }                            
+                })
+                
+                if(availableMonths.length == 0){
+                    reject('Error reading the spreadsheet')
+                }
+                
+                resolve(availableMonths)
+
+            })
+        }
     }
 }
 
