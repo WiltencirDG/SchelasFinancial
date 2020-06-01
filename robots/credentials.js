@@ -1,5 +1,10 @@
 const aws = require('aws-sdk');
-const credentialsOff = require('../credentials/google-spreadsheet.json')
+const fs = require('fs')
+
+let credentialsOff
+if(fs.existsSync('../credentials/google-spreadsheet.json')){
+    credentialsOff = require('../credentials/google-spreadsheet.json')
+}
 
 async function robot(){
     return await getCredentials()
