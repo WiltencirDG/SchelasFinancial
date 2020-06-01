@@ -1,5 +1,6 @@
 const port = process.env.PORT || 8080
 const state = require('./state.js')
+const spreadsheet = require('./spreadsheet.js')
 var express = require("express");
 
 async function robot(){
@@ -24,8 +25,11 @@ async function robot(){
     }
 
     async function apiCalls(app){
-        const content = state.load()
-        app.get("/index.js", (req, res) => {
+        //const content = state.load()
+        //const content = await spreadsheet
+        app.get("/index.js", async (req, res) => {
+            const content = await spreadsheet()
+
             res.set({ 'content-type': 'application/json; charset=utf-8' });
             res.statusCode = 200
             res.end(JSON.stringify(content))

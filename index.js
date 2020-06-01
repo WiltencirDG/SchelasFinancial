@@ -5,9 +5,7 @@ const robots = {
 
 async function start(){
     
-    await robots.spreadsheet()
     await robots.server()
-
 
 }
 

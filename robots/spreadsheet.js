@@ -15,7 +15,8 @@ async function robot(){
     
     await organizeAllRows(spreadsheetContent)
     
-    state.save(content)
+    //state.save(content)
+    return content
 
     async function accessSpreadsheet(){
         const spreadsheetDocument = new GoogleSpreadsheet(credentials.documentId)
