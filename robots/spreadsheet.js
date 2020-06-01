@@ -46,6 +46,7 @@ async function robot(){
     state.save(content)
 
     async function accessSpreadsheet(){
+        console.log(credentials.documentId)
         const spreadsheetDocument = new GoogleSpreadsheet(credentials.documentId)
         return spreadsheetDocument
     }
