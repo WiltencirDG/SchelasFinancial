@@ -13,7 +13,6 @@ async function robot(){
     const spreadsheetContent = await readAllRows(spreadsheetDocument)
     await organizeAllRows(spreadsheetContent)
     
-    console.log(content,null,4)
     state.save(content)
 
     async function accessSpreadsheet(){
@@ -27,7 +26,7 @@ async function robot(){
 
     async function readAllRows(spreadsheetDocument){
         const info = await promisify(spreadsheetDocument.getInfo)()
-        const sheet = info.worksheets[0]
+        const sheet = info.worksheets[1]
     
         const rows = await promisify(sheet.getCells)({
             'min-row': 1,
@@ -45,12 +44,11 @@ async function robot(){
     }
 
     async function organizeAllRows(spreadsheetContent){
-        let actualHeader
-        let actualOwner
         content.availableMonths = await getAllAvailableMonths(spreadsheetContent)
         content.availableEntities = await getAllAvailableEntities(spreadsheetContent)
-        content.card = []
-        content.bank = []
+        //await getEntitiesColor(content.availableEntities)
+        content.entries = await getAllEntries(spreadsheetContent)
+        
 
         async function getAllAvailableMonths(spreadsheetContent){
             const availableMonths = []
@@ -82,7 +80,7 @@ async function robot(){
             let actualHeader
             return new Promise((resolve,reject)=>{
                 const rowHeadersAndEntityName = spreadsheetContent.filter((content) => content.col < 3 && content._value != '')
-                console.log(rowHeadersAndEntityName,null,4)
+
                 for(let rowHeaderIndex in rowHeadersAndEntityName){
                     if(rowHeadersAndEntityName[rowHeaderIndex].col == 1){
                         actualHeader = rowHeadersAndEntityName[rowHeaderIndex]._value
@@ -97,6 +95,50 @@ async function robot(){
                 }
 
                 resolve(availableEntities)
+            })
+        }
+
+        async function getAllEntries(spreadsheetContent){
+            const entries = []
+            return new Promise((resolve, reject) => {
+                const rowsMonth = spreadsheetContent.filter((content) => content.col > 0 && content.row == 1 && content._value != '').map((item) => {return item.value})
+                const rowsEntity = spreadsheetContent.filter((content) => content.col == 1 && content._value != '').map((item) => {return item.value})
+                const rowsEntityName = spreadsheetContent.filter((content) => content.col == 2 && content.row > 0 && content._value != '').map((item) => {return item.value})
+                const rowsEntryDescription = spreadsheetContent.filter((content) => content.col == 3 && content.row > 0 && content._value != '').map((item) => {return item.value})
+                const rowsEntries = spreadsheetContent.filter((content) => content.col > 3 && content.row > 0 && content._value != '').map((item) => {return item.value})
+
+                let year, actualEntity, actualHeader
+                console.log(rowsMonth,null,4)
+                for(let rowIndex = 0; rowIndex < content.numRows; rowIndex++){
+                    year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
+                    for(let colIndex = 0; colIndex < content.numCols; colIndex++){
+
+                        if(rowsEntity[rowIndex] != undefined){ actualHeader = rowsEntity[rowIndex] }
+
+                        if(rowsEntityName[rowIndex] != undefined){ actualEntity = rowsEntityName[rowIndex] }
+
+                        if(rowsMonth[colIndex] == 'JANEIRO'){ year++ }
+                        
+                        
+
+                        entries.push({
+                            entries:{
+                                type: EntityType[actualHeader], 
+                                name: actualEntity,
+                                color: '',
+                                entry:{
+                                    year: year.toString(),
+                                    month: rowsMonth[colIndex],
+                                    description: rowsEntryDescription[rowIndex],
+                                    value: rowsEntries[colIndex],
+                                    type: 'Debit'
+                                }
+                            }
+                        })
+                    }
+                }
+
+                resolve(entries)
             })
         }
     }

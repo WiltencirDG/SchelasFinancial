@@ -12,7 +12,7 @@ async function start(){
 
     const content = state.load()
 
-    //console.log(content,null,4)
+    console.dir(content, {depth: null})
 
 }
 
