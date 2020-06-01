@@ -103,7 +103,6 @@ async function robot(){
             const entries = []
             return new Promise((resolve, reject) => {
                 let year, actualEntity, actualHeader, rowsEntries, rowsEntryDescription, rowsEntity, rowsEntityName, rowsMonth
-                console.log(rowsMonth,null,4)
                 for(let rowIndex = 1; rowIndex <= content.numRows; rowIndex++){
                     year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
                     for(let colIndex = 4; colIndex <= content.numCols; colIndex++){
