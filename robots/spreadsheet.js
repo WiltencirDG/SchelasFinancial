@@ -8,7 +8,7 @@ const credentialsAWS = new aws.S3({
     type: process.env.S3_type,
     project_id: process.env.S3_project_id,
     private_key_id: process.env.S3_private_key_id,
-    private_key: process.env.S3_private_key,
+    private_key: process.env.S3_private_key.replace(/\\n/gm, '\n'),
     client_email: process.env.S3_client_email,
     client_id: process.env.S3_client_id,
     auth_uri: process.env.S3_auth_uri,
