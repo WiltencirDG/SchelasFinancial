@@ -18,13 +18,25 @@ const credentialsAWS = new aws.S3({
     documentId: process.env.S3_documentId
 });
 
+const credentials = {
+    type: credentialsAWS.type,
+    project_id: credentialsAWS.project_id,
+    private_key_id: credentialsAWS.private_key_id,
+    private_key: credentialsAWS.private_key,
+    client_email: credentialsAWS.client_email,
+    client_id: credentialsAWS.client_id,
+    auth_uri: credentialsAWS.auth_uri,
+    token_uri: credentialsAWS.token_uri,
+    auth_provider_x509_cert_url: credentialsAWS.auth_provider_x509_cert_url,
+    client_x509_cert_url: credentialsAWS.client_x509_cert_url,
+    documentId: credentialsAWS.documentId
+}
 
 const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
 
 async function robot(){
     const content = {}
 
-    console.log(credentialsAWS,null,4)
     const spreadsheetDocument = await accessSpreadsheet()
     await authenticateSpreadsheet(spreadsheetDocument)
     const spreadsheetContent = await readAllRows(spreadsheetDocument)
@@ -34,24 +46,12 @@ async function robot(){
     state.save(content)
 
     async function accessSpreadsheet(){
-        const spreadsheetDocument = new GoogleSpreadsheet(credentialsAWS.documentId)
+        const spreadsheetDocument = new GoogleSpreadsheet(credentials.documentId)
         return spreadsheetDocument
     }
     
     async function authenticateSpreadsheet(spreadsheetDocument){
-        await promisify(spreadsheetDocument.useServiceAccountAuth)({
-            type: credentialsAWS.type,
-            project_id: credentialsAWS.project_id,
-            private_key_id: credentialsAWS.private_key_id,
-            private_key: credentialsAWS.private_key,
-            client_email: credentialsAWS.client_email,
-            client_id: credentialsAWS.client_id,
-            auth_uri: credentialsAWS.auth_uri,
-            token_uri: credentialsAWS.token_uri,
-            auth_provider_x509_cert_url: credentialsAWS.auth_provider_x509_cert_url,
-            client_x509_cert_url: credentialsAWS.client_x509_cert_url,
-            documentId: credentialsAWS.documentId
-        })
+        await promisify(spreadsheetDocument.useServiceAccountAuth)(credentials)
     }
 
     async function readAllRows(spreadsheetDocument){
