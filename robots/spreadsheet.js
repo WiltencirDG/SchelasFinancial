@@ -19,17 +19,17 @@ const credentialsAWS = new aws.S3({
 });
 
 const credentials = {
-    type: credentialsAWS.type,
-    project_id: credentialsAWS.project_id,
-    private_key_id: credentialsAWS.private_key_id,
-    private_key: credentialsAWS.private_key,
-    client_email: credentialsAWS.client_email,
-    client_id: credentialsAWS.client_id,
-    auth_uri: credentialsAWS.auth_uri,
-    token_uri: credentialsAWS.token_uri,
-    auth_provider_x509_cert_url: credentialsAWS.auth_provider_x509_cert_url,
-    client_x509_cert_url: credentialsAWS.client_x509_cert_url,
-    documentId: credentialsAWS.documentId
+    type: credentialsAWS.Service.type,
+    project_id: credentialsAWS.Service.project_id,
+    private_key_id: credentialsAWS.Service.private_key_id,
+    private_key: credentialsAWS.Service.private_key,
+    client_email: credentialsAWS.Service.client_email,
+    client_id: credentialsAWS.Service.client_id,
+    auth_uri: credentialsAWS.Service.auth_uri,
+    token_uri: credentialsAWS.Service.token_uri,
+    auth_provider_x509_cert_url: credentialsAWS.Service.auth_provider_x509_cert_url,
+    client_x509_cert_url: credentialsAWS.Service.client_x509_cert_url,
+    documentId: credentialsAWS.Service.documentId
 }
 
 const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
