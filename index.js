@@ -7,13 +7,13 @@ const robots = {
 
 async function start(){
     
-    //await robots.spreadsheet()
+    await robots.spreadsheet()
 
-    //const content = state.load()
+    const content = state.load()
 
     //console.dir(content, {depth: null})
 
-    /*const server = http.createServer((request, response) => {
+    const server = http.createServer((request, response) => {
         response.statusCode = 200
         response.setHeader('Content-Type', 'text/txt')
         response.end('content bla bla')
@@ -21,7 +21,7 @@ async function start(){
 
     server.listen(port, () => {
         console.log('Server started at: https://schelas-financial.herokuapp.com/index.js')
-    })*/
+    })
     
 
 }
