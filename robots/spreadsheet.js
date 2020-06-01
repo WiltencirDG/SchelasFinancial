@@ -1,42 +1,14 @@
 const GoogleSpreadsheet = require('google-spreadsheet')
-const aws = require('aws-sdk');
 const { promisify } = require('util')
 const state = require('./state.js')
-
-//const credentials = require('../credentials/google-spreadsheet.json')
-const credentialsAWS = new aws.S3({
-    type: process.env.S3_type,
-    project_id: process.env.S3_project_id,
-    private_key_id: process.env.S3_private_key_id,
-    private_key: process.env.S3_private_key.replace(/\\n/gm, '\n'),
-    client_email: process.env.S3_client_email,
-    client_id: process.env.S3_client_id,
-    auth_uri: process.env.S3_auth_uri,
-    token_uri: process.env.S3_token_uri,
-    auth_provider_x509_cert_url: process.env.S3_auth_provider_x509_cert_url,
-    client_x509_cert_url: process.env.S3_client_x509_cert_url,
-    documentId: process.env.S3_documentId
-});
-
-const credentials = {
-    type: credentialsAWS.config.type,
-    project_id: credentialsAWS.config.project_id,
-    private_key_id: credentialsAWS.config.private_key_id,
-    private_key: credentialsAWS.config.private_key,
-    client_email: credentialsAWS.config.client_email,
-    client_id: credentialsAWS.config.client_id,
-    auth_uri: credentialsAWS.config.auth_uri,
-    token_uri: credentialsAWS.config.token_uri,
-    auth_provider_x509_cert_url: credentialsAWS.config.auth_provider_x509_cert_url,
-    client_x509_cert_url: credentialsAWS.config.client_x509_cert_url,
-    documentId: credentialsAWS.config.documentId
-}
+const credential = require('./credentials.js')
 
 const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
 
 async function robot(){
     const content = {}
 
+    const credentials = await credential()
     const spreadsheetDocument = await accessSpreadsheet()
     await authenticateSpreadsheet(spreadsheetDocument)
     const spreadsheetContent = await readAllRows(spreadsheetDocument)
@@ -161,7 +133,7 @@ async function robot(){
                                         month: rowsMonth[0],
                                         description: rowsEntryDescription[0],
                                         value: rowsEntries[0],
-                                        type: 'Debit'
+                                        type: parseFloat(rowsEntries[0].replace("R$ ","").replace(",",".")) > 0 ? 'Credit' : 'Debit'
                                     }
                                 }
                             })
