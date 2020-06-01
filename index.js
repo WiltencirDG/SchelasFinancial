@@ -1,5 +1,4 @@
 const robots = {
-    spreadsheet: require('./robots/spreadsheet.js'),
     server: require('./robots/server.js')
 }
 

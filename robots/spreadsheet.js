@@ -1,6 +1,5 @@
 const GoogleSpreadsheet = require('google-spreadsheet')
 const { promisify } = require('util')
-const state = require('./state.js')
 const credential = require('./credentials.js')
 
 const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
@@ -15,7 +14,6 @@ async function robot(){
     
     await organizeAllRows(spreadsheetContent)
     
-    //state.save(content)
     return content
 
     async function accessSpreadsheet(){
