@@ -3,7 +3,7 @@ const aws = require('aws-sdk');
 const { promisify } = require('util')
 const state = require('./state.js')
 
-const credentials = require('../credentials/google-spreadsheet.json')
+//const credentials = require('../credentials/google-spreadsheet.json')
 const credentialsAWS = new aws.S3({
     type: process.env.S3_type,
     project_id: process.env.S3_project_id,
@@ -33,12 +33,12 @@ async function robot(){
     state.save(content)
 
     async function accessSpreadsheet(){
-        const spreadsheetDocument = new GoogleSpreadsheet(credentials.documentId)
+        const spreadsheetDocument = new GoogleSpreadsheet(credentialsAWS.documentId)
         return spreadsheetDocument
     }
     
     async function authenticateSpreadsheet(spreadsheetDocument){
-        await promisify(spreadsheetDocument.useServiceAccountAuth)(credentials)
+        await promisify(spreadsheetDocument.useServiceAccountAuth)(credentialsAWS)
     }
 
     async function readAllRows(spreadsheetDocument){
