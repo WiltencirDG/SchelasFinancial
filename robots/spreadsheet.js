@@ -1,7 +1,23 @@
 const GoogleSpreadsheet = require('google-spreadsheet')
+const aws = require('aws-sdk');
 const { promisify } = require('util')
-const credentials = require('../credentials/google-spreadsheet.json')
 const state = require('./state.js')
+
+const credentials = require('../credentials/google-spreadsheet.json')
+const credentialsAWS = new aws.S3({
+    type: process.env.S3_type,
+    project_id: process.env.S3_project_id,
+    private_key_id: process.env.S3_private_key_id,
+    private_key: process.env.S3_private_key,
+    client_email: process.env.S3_client_email,
+    client_id: process.env.S3_client_id,
+    auth_uri: process.env.S3_auth_uri,
+    token_uri: process.env.S3_token_uri,
+    auth_provider_x509_cert_url: process.env.S3_auth_provider_x509_cert_url,
+    client_x509_cert_url: process.env.S3_client_x509_cert_url,
+    documentId: process.env.S3_documentId
+});
+
 
 const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
 
@@ -11,6 +27,7 @@ async function robot(){
     const spreadsheetDocument = await accessSpreadsheet()
     await authenticateSpreadsheet(spreadsheetDocument)
     const spreadsheetContent = await readAllRows(spreadsheetDocument)
+    
     await organizeAllRows(spreadsheetContent)
     
     state.save(content)
@@ -101,43 +118,44 @@ async function robot(){
         async function getAllEntries(spreadsheetContent){
             const entries = []
             return new Promise((resolve, reject) => {
-                const rowsMonth = spreadsheetContent.filter((content) => content.col > 0 && content.row == 1 && content._value != '').map((item) => {return item.value})
-                const rowsEntity = spreadsheetContent.filter((content) => content.col == 1 && content._value != '').map((item) => {return item.value})
-                const rowsEntityName = spreadsheetContent.filter((content) => content.col == 2 && content.row > 0 && content._value != '').map((item) => {return item.value})
-                const rowsEntryDescription = spreadsheetContent.filter((content) => content.col == 3 && content.row > 0 && content._value != '').map((item) => {return item.value})
-                const rowsEntries = spreadsheetContent.filter((content) => content.col > 3 && content.row > 0 && content._value != '').map((item) => {return item.value})
-
-                let year, actualEntity, actualHeader
+                let year, actualEntity, actualHeader, rowsEntries, rowsEntryDescription, rowsEntity, rowsEntityName, rowsMonth
                 console.log(rowsMonth,null,4)
-                for(let rowIndex = 0; rowIndex < content.numRows; rowIndex++){
+                for(let rowIndex = 1; rowIndex <= content.numRows; rowIndex++){
                     year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
-                    for(let colIndex = 0; colIndex < content.numCols; colIndex++){
+                    for(let colIndex = 4; colIndex <= content.numCols; colIndex++){
 
-                        if(rowsEntity[rowIndex] != undefined){ actualHeader = rowsEntity[rowIndex] }
-
-                        if(rowsEntityName[rowIndex] != undefined){ actualEntity = rowsEntityName[rowIndex] }
-
-                        if(rowsMonth[colIndex] == 'JANEIRO'){ year++ }
+                        rowsMonth = spreadsheetContent.filter((content) => content.col == colIndex && content.row == 1 && content._value != '').map((item) => {return item.value})
+                        rowsEntries = spreadsheetContent.filter((content) => content.col == colIndex && content.row == rowIndex && content._value != '').map((item) => {return item.value})
+                        rowsEntryDescription = spreadsheetContent.filter((content) => content.col == 3 && content.row == rowIndex && content._value != '').map((item) => {return item.value})
+                        rowsEntity = spreadsheetContent.filter((content) => content.col == 1 && content.row == rowIndex && content._value != '').map((item) => {return item._value})
+                        rowsEntityName = spreadsheetContent.filter((content) => content.col == 2 && content.row == rowIndex && content._value != '').map((item) => {return item.value})
                         
-                        
+                        if(rowsEntity[0] !== undefined){ actualHeader = rowsEntity[0] }
 
-                        entries.push({
-                            entries:{
-                                type: EntityType[actualHeader], 
-                                name: actualEntity,
-                                color: '',
-                                entry:{
-                                    year: year.toString(),
-                                    month: rowsMonth[colIndex],
-                                    description: rowsEntryDescription[rowIndex],
-                                    value: rowsEntries[colIndex],
-                                    type: 'Debit'
+                        if(rowsEntityName[0] !== undefined){ actualEntity = rowsEntityName[0] }
+                        
+                        if(rowsMonth[0] == 'JANEIRO'){ year++ }                        
+
+                        if(rowsEntries[0] != null && rowsEntryDescription[0] != null && actualHeader !== undefined && actualEntity !== undefined){
+                            
+                            entries.push({
+                                entries:{
+                                    type: EntityType[actualHeader], 
+                                    name: actualEntity,
+                                    color: '',
+                                    entry:{
+                                        year: year.toString(),
+                                        month: rowsMonth[0],
+                                        description: rowsEntryDescription[0],
+                                        value: rowsEntries[0],
+                                        type: 'Debit'
+                                    }
                                 }
-                            }
-                        })
+                            })
+                        }
                     }
                 }
-
+                //process.exit(0)
                 resolve(entries)
             })
         }
