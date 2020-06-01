@@ -33,7 +33,7 @@ async function start(){
     async function apiCalls(){
         app.get("/index.js", (req, res) => {
             res.statusCode = 200
-            res.end(content)
+            res.end(JSON.stringify(content))
         });
     }
 
