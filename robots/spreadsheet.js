@@ -24,6 +24,7 @@ const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
 async function robot(){
     const content = {}
 
+    console.log(credentialsAWS,null,4)
     const spreadsheetDocument = await accessSpreadsheet()
     await authenticateSpreadsheet(spreadsheetDocument)
     const spreadsheetContent = await readAllRows(spreadsheetDocument)

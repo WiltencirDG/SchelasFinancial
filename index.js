@@ -15,8 +15,8 @@ async function start(){
 
     const server = http.createServer((request, response) => {
         response.statusCode = 200
-        response.setHeader('Content-Type', 'text/txt')
-        response.end('content bla bla')
+        response.setHeader('Content-Type', 'application/json')
+        response.end(content)
     })
 
     server.listen(port, () => {
