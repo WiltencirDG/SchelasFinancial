@@ -10,10 +10,10 @@ function componentToHex(c) {
     return hex.length == 1 ? "0" + hex : hex;
 }
   
-function rgbToHex(r, g, b) {
-    console.log(r)
-    console.log(g)
-    console.log(b)
+function rgbToHex(r, g, b){
+    r = Math.floor(r*255);
+    g = Math.floor(g*255);
+    b = Math.floor(b*255);
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
@@ -115,7 +115,7 @@ async function robot(){
                         availableEntities.push({
                             type: EntityType[actualHeader],
                             name: rowHeadersAndEntityName[rowHeaderIndex].value,
-                            color: {red,green,blue}
+                            color: rgbToHex(red,green,blue)
                         })
                     }
                 }
