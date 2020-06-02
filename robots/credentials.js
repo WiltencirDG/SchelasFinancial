@@ -1,12 +1,23 @@
 const aws = require('aws-sdk');
 const fs = require('fs')
+const googleCredentialsFilePath = '../credentials/google-spreadsheet.json'
 
-let credentialsOff
-if(fs.existsSync('../credentials/google-spreadsheet.json')){
-    credentialsOff = require('../credentials/google-spreadsheet.json')
-}
 
 async function robot(){
+    let credentialsOff
+    
+    function existsAsync(path) {
+        return new Promise(function(resolve, reject){
+            fs.exists(path, function(exists){
+                resolve(exists);
+            })
+        })
+    }
+
+    if(existsAsync(googleCredentialsFilePath)){
+        credentialsOff = require(googleCredentialsFilePath)
+    }
+
     return await getCredentials()
 
     async function getCredentials(){
