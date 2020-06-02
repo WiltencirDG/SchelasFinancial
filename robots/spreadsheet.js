@@ -151,6 +151,8 @@ async function robot(){
                                     type: EntityType[actualHeader], 
                                     name: actualEntity,
                                     entry:{
+                                        row:rowIndex,
+                                        col:colIndex,
                                         year: year.toString(),
                                         month: rowsMonth[0],
                                         description: rowsEntryDescription[0],
