@@ -1,4 +1,4 @@
-const GoogleSpreadsheet = require('google-spreadsheet')
+const { GoogleSpreadsheet }  = require('google-spreadsheet')
 const { promisify } = require('util')
 const state = require('./state.js')
 const credential = require('./credentials.js')
@@ -23,24 +23,28 @@ async function robot(){
     }
     
     async function authenticateSpreadsheet(spreadsheetDocument){
-        await promisify(spreadsheetDocument.useServiceAccountAuth)(credentials)
+        await spreadsheetDocument.useServiceAccountAuth(credentials);  
     }
 
     async function readAllRows(spreadsheetDocument){
-        const info = await promisify(spreadsheetDocument.getInfo)()
-        const sheet = info.worksheets[1]
+        
+        const rows = []
+        await spreadsheetDocument.loadInfo();
+        const sheet = spreadsheetDocument.sheetsByIndex[0];
     
-        const rows = await promisify(sheet.getCells)({
-            'min-row': 1,
-            'max-row': sheet.rowCount-27,
-            'min-col': 1,
-            'max-col': sheet.colCount,
-            'return-empty': true
+        await sheet.loadCells({
+            endRowIndex: sheet.rowCount-27
         })
         
         content.title = sheet.title
-        content.numRows = sheet.rowCount
-        content.numCols = sheet.colCount
+        content.numRows = sheet.rowCount-27
+        content.numCols = sheet.columnCount
+        
+        for(let rowIndex = 0; rowIndex < content.numRows; rowIndex++){
+            for(let colIndex = 0; colIndex < content.numCols; colIndex++){
+                rows.push(sheet.getCell(colIndex,rowIndex))
+            }
+        }
 
         return rows
     }
@@ -56,15 +60,15 @@ async function robot(){
             const availableMonths = []
             
             return new Promise((resolve,reject)=>{
-                let year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
-                
-                const firstRowsColumns = spreadsheetContent.filter((row) => row.row == 1 && row.col > 3 && row.value != '')
+                let year = spreadsheetContent.filter((row) => row._row == 1 && row._column == 3).map(row => {return row._rawData.formattedValue})[0]
+                console.log(spreadsheetContent.filter((row) => row._row == 1 && row._column == 3),null,4)
+                const firstRowsColumns = spreadsheetContent.filter((row) => row._row == 1 && row._col > 3 && row._rawData.formattedValue != '')
                 firstRowsColumns.map(item => {
-                    if(item.value == 'JANEIRO'){year++}
+                    if(item._rawData.formattedValue == 'JANEIRO'){year++}
 
                     availableMonths.push({
                         year: year.toString(),
-                        month: item.value
+                        month: item._rawData.formattedValue
                     })                          
                 })
                 
