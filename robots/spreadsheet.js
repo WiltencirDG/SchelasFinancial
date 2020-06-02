@@ -5,6 +5,18 @@ const credential = require('./credentials.js')
 
 const EntityType = Object.freeze({"CARTÃO":"Card", "BANCO":"Bank"})
 
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+  
+function rgbToHex(r, g, b) {
+    console.log(r)
+    console.log(g)
+    console.log(b)
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
 async function robot(){
     const content = {}
 
@@ -52,7 +64,6 @@ async function robot(){
     async function organizeAllRows(spreadsheetContent){
         content.availableMonths = await getAllAvailableMonths(spreadsheetContent) //OK
         content.availableEntities = await getAllAvailableEntities(spreadsheetContent)
-        //await getEntitiesColor(content.availableEntities)
         content.entries = await getAllEntries(spreadsheetContent)
         
 
@@ -85,17 +96,28 @@ async function robot(){
             const availableEntities = []
             let actualHeader
             return new Promise((resolve,reject)=>{
-                const rowHeadersAndEntityName = spreadsheetContent.filter((content) => content.col < 3 && content._value != '')
-
+                const rowHeadersAndEntityName = spreadsheetContent.filter((content) => content._column < 2 && content.value != null)
+                
                 for(let rowHeaderIndex in rowHeadersAndEntityName){
-                    if(rowHeadersAndEntityName[rowHeaderIndex].col == 1){
-                        actualHeader = rowHeadersAndEntityName[rowHeaderIndex]._value
+                    if(rowHeadersAndEntityName[rowHeaderIndex]._column == 0){
+                        actualHeader = rowHeadersAndEntityName[rowHeaderIndex].value
+                        
+                        //console.log(rowHeadersAndEntityName[rowHeaderIndex]._rawData.effectiveFormat.backgroundColor,null,4)
                     }
-                    if(rowHeadersAndEntityName[rowHeaderIndex].col == 2){
+                    if(rowHeadersAndEntityName[rowHeaderIndex]._column == 1){
+                        
+                        let red = rowHeadersAndEntityName[rowHeaderIndex]._rawData.effectiveFormat.backgroundColor.red
+                        let green = rowHeadersAndEntityName[rowHeaderIndex]._rawData.effectiveFormat.backgroundColor.green
+                        let blue = rowHeadersAndEntityName[rowHeaderIndex]._rawData.effectiveFormat.backgroundColor.blue
+
+                        red = red != null ? red : 0
+                        green = green != null ? green : 0
+                        blue = blue != null ? blue : 0
+
                         availableEntities.push({
                             type: EntityType[actualHeader],
-                            name: rowHeadersAndEntityName[rowHeaderIndex]._value,
-                            color: ''
+                            name: rowHeadersAndEntityName[rowHeaderIndex].value,
+                            color: {red,green,blue}
                         })
                     }
                 }
@@ -103,7 +125,7 @@ async function robot(){
                 resolve(availableEntities)
             })
         }
-
+        
         async function getAllEntries(spreadsheetContent){
             const entries = []
             return new Promise((resolve, reject) => {
