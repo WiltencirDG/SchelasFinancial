@@ -30,7 +30,7 @@ async function robot(){
         
         const rows = []
         await spreadsheetDocument.loadInfo();
-        const sheet = spreadsheetDocument.sheetsByIndex[0];
+        const sheet = spreadsheetDocument.sheetsByIndex[1];
     
         await sheet.loadCells({
             endRowIndex: sheet.rowCount-27
@@ -42,7 +42,7 @@ async function robot(){
         
         for(let rowIndex = 0; rowIndex < content.numRows; rowIndex++){
             for(let colIndex = 0; colIndex < content.numCols; colIndex++){
-                rows.push(sheet.getCell(colIndex,rowIndex))
+                rows.push(sheet.getCell(rowIndex,colIndex))
             }
         }
 
@@ -50,7 +50,7 @@ async function robot(){
     }
 
     async function organizeAllRows(spreadsheetContent){
-        content.availableMonths = await getAllAvailableMonths(spreadsheetContent)
+        content.availableMonths = await getAllAvailableMonths(spreadsheetContent) //OK
         content.availableEntities = await getAllAvailableEntities(spreadsheetContent)
         //await getEntitiesColor(content.availableEntities)
         content.entries = await getAllEntries(spreadsheetContent)
@@ -60,15 +60,15 @@ async function robot(){
             const availableMonths = []
             
             return new Promise((resolve,reject)=>{
-                let year = spreadsheetContent.filter((row) => row._row == 1 && row._column == 3).map(row => {return row._rawData.formattedValue})[0]
-                console.log(spreadsheetContent.filter((row) => row._row == 1 && row._column == 3),null,4)
-                const firstRowsColumns = spreadsheetContent.filter((row) => row._row == 1 && row._col > 3 && row._rawData.formattedValue != '')
+                let year = spreadsheetContent.filter((row) => row._row == 0 && row._column == 2).map(row => {return row.value})[0]
+                
+                const firstRowsColumns = spreadsheetContent.filter((row) => row._row == 0 && row._column > 2 && row.value != '')
                 firstRowsColumns.map(item => {
-                    if(item._rawData.formattedValue == 'JANEIRO'){year++}
+                    if(item.value == 'JANEIRO'){year++}
 
                     availableMonths.push({
                         year: year.toString(),
-                        month: item._rawData.formattedValue
+                        month: item.value
                     })                          
                 })
                 
