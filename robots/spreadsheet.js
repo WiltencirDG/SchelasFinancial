@@ -63,7 +63,7 @@ async function robot(){
 
     async function organizeAllRows(spreadsheetContent){
         content.availableMonths = await getAllAvailableMonths(spreadsheetContent) //OK
-        content.availableEntities = await getAllAvailableEntities(spreadsheetContent)
+        content.availableEntities = await getAllAvailableEntities(spreadsheetContent) //OK - TODO: Color.
         content.entries = await getAllEntries(spreadsheetContent)
         
 
@@ -101,8 +101,6 @@ async function robot(){
                 for(let rowHeaderIndex in rowHeadersAndEntityName){
                     if(rowHeadersAndEntityName[rowHeaderIndex]._column == 0){
                         actualHeader = rowHeadersAndEntityName[rowHeaderIndex].value
-                        
-                        //console.log(rowHeadersAndEntityName[rowHeaderIndex]._rawData.effectiveFormat.backgroundColor,null,4)
                     }
                     if(rowHeadersAndEntityName[rowHeaderIndex]._column == 1){
                         
@@ -129,17 +127,17 @@ async function robot(){
         async function getAllEntries(spreadsheetContent){
             const entries = []
             return new Promise((resolve, reject) => {
-                let year, actualEntity, actualHeader, rowsEntries, rowsEntryDescription, rowsEntity, rowsEntityName, rowsMonth
-                console.log(rowsMonth,null,4)
-                for(let rowIndex = 1; rowIndex <= content.numRows; rowIndex++){
-                    year = spreadsheetContent.filter((row) => row.row == 1 && row.col == 3).map(row => {return row.value})[0]
-                    for(let colIndex = 4; colIndex <= content.numCols; colIndex++){
+                let year, actualEntity, actualColor, actualHeader, rowsEntries, rowsEntryDescription, rowsEntity, rowsEntityName, rowsMonth
+                
+                for(let rowIndex = 0; rowIndex < content.numRows; rowIndex++){
+                    year = spreadsheetContent.filter((row) => row._row == 0 && row._column == 2).map(row => {return row.value})[0]
+                    for(let colIndex = 3; colIndex < content.numCols; colIndex++){
 
-                        rowsMonth = spreadsheetContent.filter((content) => content.col == colIndex && content.row == 1 && content._value != '').map((item) => {return item.value})
-                        rowsEntries = spreadsheetContent.filter((content) => content.col == colIndex && content.row == rowIndex && content._value != '').map((item) => {return item.value})
-                        rowsEntryDescription = spreadsheetContent.filter((content) => content.col == 3 && content.row == rowIndex && content._value != '').map((item) => {return item.value})
-                        rowsEntity = spreadsheetContent.filter((content) => content.col == 1 && content.row == rowIndex && content._value != '').map((item) => {return item._value})
-                        rowsEntityName = spreadsheetContent.filter((content) => content.col == 2 && content.row == rowIndex && content._value != '').map((item) => {return item.value})
+                        rowsMonth = spreadsheetContent.filter((content) => content._column == colIndex && content._row == 0 && content.value != null && content.value != '').map((item) => {return item.value})
+                        rowsEntries = spreadsheetContent.filter((content) => content._column == colIndex && content._row == rowIndex && content.value != null && content.value != '').map((item) => {return item.value})
+                        rowsEntryDescription = spreadsheetContent.filter((content) => content._column == 2 && content._row == rowIndex && content.value != null && content.value != '').map((item) => {return item.value})
+                        rowsEntity = spreadsheetContent.filter((content) => content._column == 0 && content._row == rowIndex && content.value != null && content.value != '').map((item) => { return item.value})
+                        rowsEntityName = spreadsheetContent.filter((content) => content._column == 1 && content._row == rowIndex && content.value != null && content.value != '').map((item) => {return item.value})
                         
                         if(rowsEntity[0] !== undefined){ actualHeader = rowsEntity[0] }
 
@@ -147,19 +145,17 @@ async function robot(){
                         
                         if(rowsMonth[0] == 'JANEIRO'){ year++ }                        
 
-                        if(rowsEntries[0] != null && rowsEntryDescription[0] != null && actualHeader !== undefined && actualEntity !== undefined){
-                            
+                        if(rowsEntries[0] != undefined && rowsEntryDescription[0] != undefined && actualHeader !== undefined && actualEntity !== undefined){
                             entries.push({
                                 entries:{
                                     type: EntityType[actualHeader], 
                                     name: actualEntity,
-                                    color: '',
                                     entry:{
                                         year: year.toString(),
                                         month: rowsMonth[0],
                                         description: rowsEntryDescription[0],
                                         value: rowsEntries[0],
-                                        type: parseFloat(rowsEntries[0].replace("R$ ","").replace(",",".")) > 0 ? 'Credit' : 'Debit'
+                                        type: parseFloat(rowsEntries[0]) > 0 ? 'Credit' : 'Debit'
                                     }
                                 }
                             })
