@@ -5,17 +5,13 @@ const googleCredentialsFilePath = '../credentials/google-spreadsheet.json'
 
 async function robot(){
     let credentialsOff
-    
-    function existsAsync(path) {
-        return new Promise(function(resolve, reject){
-            fs.exists(path, function(exists){
-                resolve(exists);
-            })
-        })
-    }
 
-    if(existsAsync(googleCredentialsFilePath)){
+    try {
         credentialsOff = require(googleCredentialsFilePath)
+    } catch (error) {
+        if (error.code !== 'MODULE_NOT_FOUND') {
+            console.log('Its okay. Using the server file...')
+        }
     }
 
     return await getCredentials()
